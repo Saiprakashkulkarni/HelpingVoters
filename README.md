@@ -2,19 +2,6 @@
 
 > 🗳️ AI-powered platform that guides Indian citizens through the entire voting process using official Election Commission of India (ECI) data.
 
-## 🏆 Hackathon Evaluation Scorecard
-
-| Category | Score | Details |
-|---|---|---|
-| **Code Quality** | 99% | Modular architecture, JSDoc, ESLint, DRY |
-| **Security** | 99% | Helmet, JWT, Rate Limiting, CSP, NoSQL Sanitize |
-| **Efficiency** | 100% | Caching, cooldowns, lazy loading, code splitting |
-| **Testing** | 99% | 122 tests, 15 suites, 100% pass rate |
-| **Accessibility** | 99% | WCAG 2.1 AA, ARIA, skip-links, keyboard nav |
-| **Google Services** | 100% | Gemini AI, Firebase Auth, Cloud Translate, Cloud NLP, Analytics |
-| **Problem Statement** | 100% | ECI-compliant, neutral, multilingual |
-
----
 
 ## 🏗️ Architecture
 
