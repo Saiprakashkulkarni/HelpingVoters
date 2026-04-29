@@ -32,44 +32,7 @@ const QuizPage = lazy(() => import('./pages/QuizPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const TranslatorPage = lazy(() => import('./pages/TranslatorPage'));
 
-// ── Premium Loading Spinner ──
-function LoadingScreen({ text = 'Loading' }) {
-  return (
-    <div className="min-h-screen bg-bg-dark flex items-center justify-center" role="status" aria-live="polite" aria-busy="true">
-      <div className="text-center">
-        <div className="relative w-14 h-14 mx-auto mb-5" aria-hidden="true">
-          {/* Outer ring */}
-          <div className="absolute inset-0 rounded-2xl border-2 border-primary/20 animate-pulse" />
-          {/* Spinning ring */}
-          <div className="absolute inset-0 rounded-2xl border-2 border-transparent border-t-primary animate-spin" style={{ animationDuration: '0.8s' }} />
-          {/* Icon */}
-          <div className="absolute inset-0 flex items-center justify-center text-xl">
-            🗳️
-          </div>
-        </div>
-        <p className="text-text-muted text-sm font-medium">{text}</p>
-        <div className="flex items-center justify-center gap-1 mt-2" aria-hidden="true">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
-        </div>
-        <span className="sr-only">{text}, please wait...</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Route-level fallback (lighter) ──
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center h-full min-h-[50vh]">
-      <div className="text-center">
-        <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-text-muted text-xs">Loading page</p>
-      </div>
-    </div>
-  );
-}
+import { LoadingScreen, PageLoader } from './components/Loader';
 
 // Requires auth + completed profile
 function ProtectedRoute({ children }) {
@@ -122,16 +85,16 @@ function AppRoutes() {
       <Route path="/dashboard" element={
         <ProtectedRoute><DashboardLayout /></ProtectedRoute>
       }>
-        <Route index element={<Suspense fallback={<PageLoader />}><OverviewPage /></Suspense>} />
-        <Route path="timeline" element={<Suspense fallback={<PageLoader />}><TimelinePage /></Suspense>} />
-        <Route path="chat" element={<Suspense fallback={<PageLoader />}><ChatPage /></Suspense>} />
-        <Route path="booth" element={<Suspense fallback={<PageLoader />}><BoothPage /></Suspense>} />
-        <Route path="eci-map" element={<Suspense fallback={<PageLoader />}><ECIMapPage /></Suspense>} />
-        <Route path="parliament" element={<Suspense fallback={<PageLoader />}><ParliamentPage /></Suspense>} />
-        <Route path="scenarios" element={<Suspense fallback={<PageLoader />}><ScenarioPage /></Suspense>} />
-        <Route path="quiz" element={<Suspense fallback={<PageLoader />}><QuizPage /></Suspense>} />
-        <Route path="translator" element={<Suspense fallback={<PageLoader />}><TranslatorPage /></Suspense>} />
-        <Route path="profile" element={<Suspense fallback={<PageLoader />}><ProfilePage /></Suspense>} />
+        <Route index element={<OverviewPage />} />
+        <Route path="timeline" element={<TimelinePage />} />
+        <Route path="chat" element={<ChatPage />} />
+        <Route path="booth" element={<BoothPage />} />
+        <Route path="eci-map" element={<ECIMapPage />} />
+        <Route path="parliament" element={<ParliamentPage />} />
+        <Route path="scenarios" element={<ScenarioPage />} />
+        <Route path="quiz" element={<QuizPage />} />
+        <Route path="translator" element={<TranslatorPage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

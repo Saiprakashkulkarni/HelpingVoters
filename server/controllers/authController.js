@@ -1,34 +1,18 @@
 /**
  * @fileoverview Authentication Controller
- * CODE QUALITY: 99% — JSDoc documented, asyncHandler wrapped, bcrypt hashed
- * SECURITY: 99% — JWT tokens, bcrypt password hashing, Firebase OAuth
- * GOOGLE SERVICES: 100% — Firebase Admin SDK for Google Sign-In
- *
- * Handles user authentication via email/password and Google OAuth.
- * Supports register, login, Google sign-in, profile completion, and session retrieval.
- *
- * @module controllers/authController
- */
-
 const User = require('../models/User');
 const Checklist = require('../models/Checklist');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { generateToken } = require('../middleware/authMiddleware');
 const admin = require('../config/firebase');
 const { firebaseInitialized } = require('../config/firebase');
+const { DEFAULT_CHECKLIST } = require('../data/checklist');
 
-// Default checklist items for new users
-const DEFAULT_CHECKLIST = [
-  { key: 'check_eligibility', label: 'Check Voter Eligibility', description: 'Verify you meet the age and citizenship requirements to vote.' },
-  { key: 'register', label: 'Register as a Voter', description: 'Apply for voter registration through Form 6 on the NVSP portal.' },
-  { key: 'get_voter_id', label: 'Get Voter ID Card (EPIC)', description: 'Receive or download your Voter ID card after registration approval.' },
-  { key: 'verify_details', label: 'Verify Your Details in Voter List', description: 'Check that your name, address, and photo are correct in the electoral roll.' },
-  { key: 'find_booth', label: 'Find Your Polling Booth', description: 'Locate your assigned polling station using the Electoral Search portal.' },
-  { key: 'prepare_documents', label: 'Prepare Required Documents', description: 'Keep your Voter ID and one additional photo ID ready for election day.' },
-  { key: 'vote', label: 'Cast Your Vote', description: 'Visit your polling booth on election day and cast your vote on the EVM.' },
-];
-
-// Helper: create checklist for user
+/**
+ * @desc    Helper to create a voter checklist for a new user
+ * @param   {Object} user - User document
+ * @returns {Promise<Object>} Created checklist document
+ */
 const createChecklist = async (user) => {
   const checklistItems = DEFAULT_CHECKLIST.map(item => ({
     ...item,
@@ -51,7 +35,11 @@ const createChecklist = async (user) => {
   return Checklist.create({ userId: user._id, items: checklistItems });
 };
 
-// Helper: calculate readiness score
+/**
+ * @desc    Helper to calculate voter readiness score
+ * @param   {Object} data - User profile data
+ * @returns {number} Calculated score (0-100)
+ */
 const calcReadinessScore = (data) => {
   let score = 0;
   if (data.voterStatus === 'registered') score += 30;
@@ -62,7 +50,12 @@ const calcReadinessScore = (data) => {
   return score;
 };
 
-// Helper: send user response with token
+/**
+ * @desc    Send authentication response with JWT token
+ * @param   {Object} res - Express response object
+ * @param   {Object} user - User document
+ * @param   {number} [statusCode=200] - HTTP status code
+ */
 const sendAuthResponse = (res, user, statusCode = 200) => {
   const token = generateToken(user._id);
   const userObj = user.toObject();
@@ -74,9 +67,11 @@ const sendAuthResponse = (res, user, statusCode = 200) => {
   });
 };
 
-// ─────────────────────────────────────────────────────────
-// POST /api/auth/register — Email + Password Registration
-// ─────────────────────────────────────────────────────────
+/**
+ * @desc    Register a new user with email and password
+ * @route   POST /api/auth/register
+ * @access  Public
+ */
 const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -104,9 +99,11 @@ const register = asyncHandler(async (req, res) => {
   sendAuthResponse(res, user, 201);
 });
 
-// ─────────────────────────────────────────────────────────
-// POST /api/auth/login — Email + Password Login
-// ─────────────────────────────────────────────────────────
+/**
+ * @desc    Login user with email and password
+ * @route   POST /api/auth/login
+ * @access  Public
+ */
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -135,9 +132,11 @@ const login = asyncHandler(async (req, res) => {
   sendAuthResponse(res, user);
 });
 
-// ─────────────────────────────────────────────────────────
-// POST /api/auth/google — Firebase Google Sign-In
-// ─────────────────────────────────────────────────────────
+/**
+ * @desc    Authenticate with Firebase Google ID token
+ * @route   POST /api/auth/google
+ * @access  Public
+ */
 const googleAuth = asyncHandler(async (req, res) => {
   // Check if Firebase Admin is properly configured
   if (!firebaseInitialized) {
@@ -187,9 +186,11 @@ const googleAuth = asyncHandler(async (req, res) => {
   sendAuthResponse(res, user, user.isNew ? 201 : 200);
 });
 
-// ─────────────────────────────────────────────────────────
-// PUT /api/auth/complete-profile — Set voter profile data
-// ─────────────────────────────────────────────────────────
+/**
+ * @desc    Complete user profile after registration
+ * @route   PUT /api/auth/complete-profile
+ * @access  Private
+ */
 const completeProfile = asyncHandler(async (req, res) => {
   const { age, state, constituency, voterStatus, hasVoterId, isFirstTimeVoter, pincode } = req.body;
 
@@ -225,9 +226,11 @@ const completeProfile = asyncHandler(async (req, res) => {
   });
 });
 
-// ─────────────────────────────────────────────────────────
-// GET /api/auth/me — Get current user
-// ─────────────────────────────────────────────────────────
+/**
+ * @desc    Get current logged-in user profile
+ * @route   GET /api/auth/me
+ * @access  Private
+ */
 const getMe = asyncHandler(async (req, res) => {
   const checklist = await Checklist.findOne({ userId: req.user._id });
   res.json({
@@ -235,9 +238,11 @@ const getMe = asyncHandler(async (req, res) => {
     data: { user: req.user, checklist },
   });
 });
-// ─────────────────────────────────────────────────────────
-// PUT /api/auth/update-profile — Update profile fields
-// ─────────────────────────────────────────────────────────
+/**
+ * @desc    Update user profile fields
+ * @route   PUT /api/auth/update-profile
+ * @access  Private
+ */
 const updateProfile = asyncHandler(async (req, res) => {
   const user = req.user;
   const { name, age, state, pincode, voterStatus, hasVoterId, isFirstTimeVoter } = req.body;

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../context/UserContext';
 import Background3D from '../components/Background3D';
+import { PageLoader } from '../components/Loader';
 import {
   FiLogOut, FiMenu, FiX, FiSun, FiMoon, FiUser, FiChevronRight
 } from 'react-icons/fi';
@@ -153,10 +154,11 @@ export default function DashboardLayout() {
         </div>
       </header>
 
-      {/* ====== MAIN CONTENT ====== */}
       <main className="flex-1 overflow-y-auto w-full relative">
         <div className="p-4 lg:p-8 max-w-7xl mx-auto h-full">
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
 

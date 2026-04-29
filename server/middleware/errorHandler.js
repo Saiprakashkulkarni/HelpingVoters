@@ -1,9 +1,7 @@
-// ── Error Handler (SECURITY: 100%) ──────────────────────────────
-// - Sanitizes error messages in production (never leaks stack traces)
-// - Returns generic message for 500 errors in production mode
-// - Only shows stack traces in development mode for debugging
 const errorHandler = (err, req, res, next) => {
-  console.error('❌ Error:', err.message);
+  if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+    console.error('❌ Error:', err.message);
+  }
 
   const statusCode = err.statusCode || 500;
 
